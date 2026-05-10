@@ -1,0 +1,532 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Sales System</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0f172a;
+            color: white;
+            padding: 30px;
+        }
+
+        header {
+            background: #111827;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        }
+
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: start;
+        }
+
+        .card-dashboard {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            padding: 18px;
+            border-radius: 18px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+
+        .card-dashboard:hover {
+            transform: translateY(-4px);
+        }
+
+        .card-dashboard h2 {
+            font-size: 15px;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+        }
+
+        .card-dashboard p {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .form {
+            background: #111827;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form input {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+        }
+
+        .form button {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .form button:hover {
+            background: #1d4ed8;
+        }
+
+        .form button:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .card h2 {
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            margin-bottom: 8px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+
+        .edit {
+            background: #f59e0b;
+        }
+
+        .delete {
+            background: #dc2626;
+        }
+
+        .logout {
+            background: #dc2626;
+            margin-top: 10px;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+
+    <!-- HEADER -->
+    <header>
+
+        <h1>🚗 Car Sales System - Admin Panel</h1>
+
+        <p class="status" v-if="logado" style="color:lightgreen;">
+            ✔ Bem-vindo, {{ username }}
+        </p>
+
+        <p class="status" v-else style="color:#ff6b6b;">
+            ❌ Acesso restrito
+        </p>
+
+        <button
+            class="logout"
+            v-if="logado"
+            @click="logout"
+        >
+            🚪 Sair
+        </button>
+
+    </header>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard">
+
+        <div class="card-dashboard">
+            <h2>🚗 Total de Carros</h2>
+            <p>{{ totalCarros }}</p>
+        </div>
+
+        <div class="card-dashboard">
+            <h2>🟢 Estado do Sistema</h2>
+            <p>{{ logado ? 'Online' : 'Offline' }}</p>
+        </div>
+
+    </div>
+
+    <!-- LOGIN -->
+    <div class="form" v-if="!logado">
+
+        <h2>🔐 Login Admin</h2>
+
+        <input
+            v-model="username"
+            placeholder="Username"
+        >
+
+        <input
+            v-model="password"
+            type="password"
+            placeholder="Password"
+        >
+
+        <button @click="login">
+            Entrar
+        </button>
+
+    </div>
+
+    <!-- FORM CARROS -->
+    <div class="form">
+
+        <h2>
+            {{ carro.id ? '✏ Atualizar Carro' : '➕ Adicionar Carro' }}
+        </h2>
+
+        <input v-model="carro.marca" placeholder="Marca">
+
+        <input v-model="carro.modelo" placeholder="Modelo">
+
+        <input v-model="carro.ano" type="number" placeholder="Ano">
+
+        <input v-model="carro.preco" type="number" placeholder="Preço">
+
+        <input v-model="carro.imagem" placeholder="Imagem (URL ou nome.jpg)">
+
+        <button
+            @click="salvarCarro"
+            :disabled="!logado"
+        >
+            {{ carro.id ? 'Atualizar Carro' : 'Adicionar Carro' }}
+        </button>
+
+    </div>
+
+    <!-- LISTA -->
+    <div class="grid">
+
+        <div class="card" v-for="c in carros" :key="c.id">
+
+            <img :src="c.imagem" alt="Carro">
+
+            <div class="card-content">
+
+                <h2>{{ c.marca }} {{ c.modelo }}</h2>
+
+                <p>📅 Ano: {{ c.ano }}</p>
+
+                <p>💰 {{ c.preco }} MZN</p>
+
+                <div class="buttons">
+
+                    <button
+                        class="edit"
+                        @click="editarCarro(c)"
+                        :disabled="!logado"
+                    >
+                        ✏ Editar
+                    </button>
+
+                    <button
+                        class="delete"
+                        @click="eliminarCarro(c.id)"
+                        :disabled="!logado"
+                    >
+                        ❌ Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const { createApp } = Vue;
+
+createApp({
+
+    data() {
+        return {
+
+            carros: [],
+            totalCarros: 0,
+
+            carro: {
+                id: null,
+                marca: "",
+                modelo: "",
+                ano: "",
+                preco: "",
+                imagem: ""
+            },
+
+            username: "",
+            password: "",
+            logado: false
+
+        }
+    },
+
+    mounted() {
+        this.carregarCarros();
+    },
+
+    methods: {
+
+        // LOGIN
+        login() {
+
+            fetch("http://localhost:8000/api/login.php", {
+
+                method: "POST",
+
+                credentials: "include",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    username: this.username,
+                    password: this.password
+                })
+
+            })
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                console.log(data);
+
+                if (data.user) {
+
+                    this.logado = true;
+
+                    alert("✔ Login feito com sucesso");
+
+                    this.carregarCarros();
+
+                } else {
+
+                    alert("❌ Login inválido");
+                }
+
+            })
+
+            .catch(err => {
+                console.error("Erro no login:", err);
+            });
+        },
+
+        // LOGOUT
+        logout() {
+
+            this.logado = false;
+
+            this.username = "";
+            this.password = "";
+        },
+
+        // LISTAR
+        carregarCarros() {
+
+            fetch("http://localhost:8000/api/carros.php", {
+                credentials: "include"
+            })
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                this.carros = data;
+
+                this.totalCarros = data.length;
+
+            })
+
+            .catch(err => {
+                console.error("Erro ao carregar carros:", err);
+            });
+        },
+
+        // SALVAR
+        salvarCarro() {
+
+            if (!this.logado) {
+                alert("❌ Precisas fazer login primeiro");
+                return;
+            }
+
+            let url = "http://localhost:8000/api/carros.php";
+
+            if (this.carro.id) {
+                url += "?action=update";
+            }
+
+            fetch(url, {
+
+                method: "POST",
+
+                credentials: "include",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(this.carro)
+
+            })
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                alert(data.message);
+
+                this.limparFormulario();
+
+                this.carregarCarros();
+
+            })
+
+            .catch(err => {
+                console.error("Erro ao salvar:", err);
+            });
+        },
+
+        // ELIMINAR
+        eliminarCarro(id) {
+
+            if (!this.logado) {
+                alert("❌ Precisas fazer login primeiro");
+                return;
+            }
+
+            fetch("http://localhost:8000/api/carros.php", {
+
+                method: "DELETE",
+
+                credentials: "include",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({ id })
+
+            })
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                alert(data.message);
+
+                this.carregarCarros();
+
+            })
+
+            .catch(err => {
+                console.error("Erro ao eliminar:", err);
+            });
+        },
+
+        // EDITAR
+        editarCarro(carro) {
+            this.carro = { ...carro };
+        },
+
+        // LIMPAR
+        limparFormulario() {
+
+            this.carro = {
+                id: null,
+                marca: "",
+                modelo: "",
+                ano: "",
+                preco: "",
+                imagem: ""
+            };
+        }
+
+    }
+
+}).mount("#app");
+
+</script>
+
+</body>
+</html>
