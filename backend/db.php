@@ -1,18 +1,21 @@
 <?php
 
-$host = "db"; // nome do serviço no docker-compose
-$dbname = "carrosdb";
-$username = "root";
-$password = "root";
+$host = getenv("DB_HOST");
+$dbname = getenv("DB_NAME");
+$username = getenv("DB_USER");
+$password = getenv("DB_PASSWORD");
+
+if (!$host || !$dbname || !$username || !$password) {
+    die("ERRO: Variáveis de ambiente não configuradas no Render.");
+}
 
 try {
     $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8",
+        "pgsql:host=$host;port=5432;dbname=$dbname",
         $username,
-        $password
+        $password,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
-
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 } catch (Exception $e) {
     die("Erro na conexão: " . $e->getMessage());

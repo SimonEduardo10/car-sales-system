@@ -6,8 +6,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
 header("Content-Type: application/json");
 
-/* ✅ CORS CORRETO */
-header("Access-Control-Allow-Origin: http://localhost:8000");
+/* =========================
+   CORS (DEV + FUTURO DEPLOY)
+========================= */
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -20,10 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once "../db.php";
 
-/* =======================
-   FUNÇÃO DE PROTEÇÃO
-======================= */
+/* =========================
+   PROTEÇÃO DE ROTA
+========================= */
 function protegerRota() {
+
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
     if (!isset($_SESSION['user'])) {
 
@@ -37,48 +43,37 @@ function protegerRota() {
     }
 }
 
-/* =======================
+/* =========================
    LISTAR (PÚBLICO)
-======================= */
+========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     $stmt = $pdo->query("SELECT * FROM carros");
 
-    echo json_encode(
-        $stmt->fetchAll(PDO::FETCH_ASSOC)
-    );
-
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
     exit;
 }
 
-/* =======================
+/* =========================
    CREATE (PROTEGIDO)
-======================= */
-if ($_SERVER['REQUEST_METHOD'] === 'POST'
-    && !isset($_GET['action'])) {
+========================= */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_GET['action'])) {
 
     protegerRota();
 
-    $data = json_decode(
-        file_get_contents("php://input")
-    );
+    $data = json_decode(file_get_contents("php://input"));
 
     $stmt = $pdo->prepare("
-        INSERT INTO carros
-        (marca, modelo, ano, preco, imagem)
-
-        VALUES
-        (:marca, :modelo, :ano, :preco, :imagem)
+        INSERT INTO carros (marca, modelo, ano, preco, imagem)
+        VALUES (:marca, :modelo, :ano, :preco, :imagem)
     ");
 
     $stmt->execute([
-
         ":marca" => $data->marca ?? '',
         ":modelo" => $data->modelo ?? '',
         ":ano" => $data->ano ?? 0,
         ":preco" => $data->preco ?? 0,
         ":imagem" => $data->imagem ?? ''
-
     ]);
 
     echo json_encode([
@@ -88,41 +83,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     exit;
 }
 
-/* =======================
+/* =========================
    UPDATE (PROTEGIDO)
-======================= */
-if ($_SERVER['REQUEST_METHOD'] === 'POST'
-    && isset($_GET['action'])
-    && $_GET['action'] === 'update') {
+========================= */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'update') {
 
     protegerRota();
 
-    $data = json_decode(
-        file_get_contents("php://input")
-    );
+    $data = json_decode(file_get_contents("php://input"));
 
     $stmt = $pdo->prepare("
-        UPDATE carros
-
-        SET
-            marca = :marca,
-            modelo = :modelo,
-            ano = :ano,
-            preco = :preco,
-            imagem = :imagem
-
-        WHERE id = :id
+        UPDATE carros 
+        SET marca=:marca, modelo=:modelo, ano=:ano, preco=:preco, imagem=:imagem
+        WHERE id=:id
     ");
 
     $stmt->execute([
-
         ":id" => $data->id,
         ":marca" => $data->marca,
         ":modelo" => $data->modelo,
         ":ano" => $data->ano,
         ":preco" => $data->preco,
         ":imagem" => $data->imagem
-
     ]);
 
     echo json_encode([
@@ -132,20 +114,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     exit;
 }
 
-/* =======================
+/* =========================
    DELETE (PROTEGIDO)
-======================= */
+========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
 
     protegerRota();
 
-    $data = json_decode(
-        file_get_contents("php://input")
-    );
+    $data = json_decode(file_get_contents("php://input"));
 
     $stmt = $pdo->prepare("
-        DELETE FROM carros
-        WHERE id = :id
+        DELETE FROM carros WHERE id = :id
     ");
 
     $stmt->execute([

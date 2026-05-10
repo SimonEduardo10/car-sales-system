@@ -316,9 +316,11 @@
 const { createApp } = Vue;
 
 createApp({
-
     data() {
         return {
+
+            // API BASE (MUDA DEPOIS NO RENDER)
+            API_BASE: "http://localhost:8000/api",
 
             carros: [],
             totalCarros: 0,
@@ -335,94 +337,89 @@ createApp({
             username: "",
             password: "",
             logado: false
-
         }
     },
 
     mounted() {
+        this.verificarSessao();
         this.carregarCarros();
     },
 
     methods: {
 
+        // ======================
+        // VERIFICAR SESSÃO
+        // ======================
+        verificarSessao() {
+            // opcional: futuro endpoint /me.php
+            this.logado = false;
+        },
+
+        // ======================
         // LOGIN
+        // ======================
         login() {
 
-            fetch("http://localhost:8000/api/login.php", {
-
+            fetch(`${this.API_BASE}/login.php`, {
                 method: "POST",
-
                 credentials: "include",
-
                 headers: {
                     "Content-Type": "application/json"
                 },
-
                 body: JSON.stringify({
                     username: this.username,
                     password: this.password
                 })
-
             })
-
             .then(res => res.json())
-
             .then(data => {
 
-                console.log(data);
-
                 if (data.user) {
-
                     this.logado = true;
-
                     alert("✔ Login feito com sucesso");
-
                     this.carregarCarros();
-
                 } else {
-
                     alert("❌ Login inválido");
                 }
 
             })
-
             .catch(err => {
                 console.error("Erro no login:", err);
             });
         },
 
+        // ======================
         // LOGOUT
+        // ======================
         logout() {
-
             this.logado = false;
-
             this.username = "";
             this.password = "";
         },
 
+        // ======================
         // LISTAR
+        // ======================
         carregarCarros() {
 
-            fetch("http://localhost:8000/api/carros.php", {
+            fetch(`${this.API_BASE}/carros.php`, {
                 credentials: "include"
             })
-
             .then(res => res.json())
-
             .then(data => {
 
                 this.carros = data;
-
                 this.totalCarros = data.length;
 
             })
-
             .catch(err => {
                 console.error("Erro ao carregar carros:", err);
             });
         },
 
+        // ======================
         // SALVAR
+        // ======================
         salvarCarro() {
 
             if (!this.logado) {
@@ -430,44 +427,36 @@ createApp({
                 return;
             }
 
-            let url = "http://localhost:8000/api/carros.php";
+            let url = `${this.API_BASE}/carros.php`;
 
             if (this.carro.id) {
                 url += "?action=update";
             }
 
             fetch(url, {
-
                 method: "POST",
-
                 credentials: "include",
-
                 headers: {
                     "Content-Type": "application/json"
                 },
-
                 body: JSON.stringify(this.carro)
-
             })
-
             .then(res => res.json())
-
             .then(data => {
 
                 alert(data.message);
-
                 this.limparFormulario();
-
                 this.carregarCarros();
 
             })
-
             .catch(err => {
                 console.error("Erro ao salvar:", err);
             });
         },
 
+        // ======================
         // ELIMINAR
+        // ======================
         eliminarCarro(id) {
 
             if (!this.logado) {
@@ -475,43 +464,37 @@ createApp({
                 return;
             }
 
-            fetch("http://localhost:8000/api/carros.php", {
-
+            fetch(`${this.API_BASE}/carros.php`, {
                 method: "DELETE",
-
                 credentials: "include",
-
                 headers: {
                     "Content-Type": "application/json"
                 },
-
                 body: JSON.stringify({ id })
-
             })
-
             .then(res => res.json())
-
             .then(data => {
 
                 alert(data.message);
-
                 this.carregarCarros();
 
             })
-
             .catch(err => {
                 console.error("Erro ao eliminar:", err);
             });
         },
 
+        // ======================
         // EDITAR
+        // ======================
         editarCarro(carro) {
             this.carro = { ...carro };
         },
 
+        // ======================
         // LIMPAR
+        // ======================
         limparFormulario() {
-
             this.carro = {
                 id: null,
                 marca: "",
