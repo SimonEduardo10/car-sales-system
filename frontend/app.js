@@ -15,7 +15,6 @@ createApp({
                 imagem: ""
             },
 
-            // 🔐 LOGIN
             username: "",
             password: "",
             logado: false
@@ -32,57 +31,66 @@ createApp({
         // LOGIN
         // ======================
         login() {
-            fetch("http://localhost:8000/api/login.php", {
+            fetch("/api/login.php", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({
                     username: this.username,
                     password: this.password
                 })
             })
-            .then(res => res.json())
+            .then(async res => {
+                const data = await res.json().catch(() => null);
+                console.log("LOGIN RESPONSE:", data, res.status);
+
+                return data;
+            })
             .then(data => {
-                if (data.user) {
+
+                if (data && data.user) {
                     this.logado = true;
                     alert("✔ Login feito com sucesso");
-                    this.carregarCarros(); // atualiza dashboard após login
+                    this.carregarCarros();
                 } else {
                     alert("❌ Login inválido");
                 }
+
             })
-            .catch(err => console.error("Erro no login:", err));
+            .catch(err => {
+                console.error("Erro no login:", err);
+                alert("Erro no servidor login");
+            });
         },
 
+        // LOGOUT
         logout() {
             this.logado = false;
             this.username = "";
             this.password = "";
         },
 
-        // ======================
         // LISTAR
-        // ======================
         carregarCarros() {
-            fetch("http://localhost:8000/api/carros.php")
-                .then(res => res.json())
-                .then(data => {
-                    this.carros = data;
-                    this.totalCarros = data.length;
-                })
-                .catch(err => console.error("Erro ao carregar carros:", err));
+            fetch("/api/carros.php")
+            .then(res => res.json())
+            .then(data => {
+                this.carros = data;
+                this.totalCarros = data.length;
+            })
+            .catch(err => console.error("Erro carros:", err));
         },
 
-        // ======================
-        // SALVAR (CREATE + UPDATE)
-        // ======================
+        // SALVAR
         salvarCarro() {
 
             if (!this.logado) {
-                alert("❌ Precisas fazer login primeiro");
+                alert("❌ Faz login primeiro");
                 return;
             }
 
-            let url = "http://localhost:8000/api/carros.php";
+            let url = "/api/carros.php";
 
             if (this.carro.id) {
                 url += "?action=update";
@@ -90,48 +98,40 @@ createApp({
 
             fetch(url, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify(this.carro)
             })
             .then(res => res.json())
-            .then(data => {
-                console.log(data.message);
+            .then(() => {
                 this.limparFormulario();
                 this.carregarCarros();
             })
-            .catch(err => console.error("Erro ao salvar:", err));
+            .catch(err => console.error(err));
         },
 
-        // ======================
         // ELIMINAR
-        // ======================
         eliminarCarro(id) {
 
-            if (!this.logado) {
-                alert("❌ Precisas fazer login primeiro");
-                return;
-            }
+            if (!this.logado) return;
 
-            fetch("http://localhost:8000/api/carros.php", {
+            fetch("/api/carros.php", {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({ id })
             })
             .then(res => res.json())
             .then(() => this.carregarCarros())
-            .catch(err => console.error("Erro ao eliminar:", err));
+            .catch(err => console.error(err));
         },
 
-        // ======================
-        // EDITAR
-        // ======================
         editarCarro(carro) {
             this.carro = { ...carro };
         },
 
-        // ======================
-        // LIMPAR FORM
-        // ======================
         limparFormulario() {
             this.carro = {
                 id: null,

@@ -3,132 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Sales System</title>
+    <title>🚗 Car Sales System</title>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
         }
 
-        body {
-            background: #0f172a;
-            color: white;
-            padding: 30px;
+        body{
+            background:#0f172a;
+            color:white;
+            padding:30px;
         }
 
-        header {
-            background: #111827;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 25px;
+        header{
+            background:#111827;
+            padding:25px;
+            border-radius:15px;
+            margin-bottom:25px;
         }
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
-            gap: 15px;
-            margin-bottom: 25px;
+        h1{
+            margin-bottom:10px;
         }
 
-        .card-dashboard {
-            background: #1e293b;
-            padding: 18px;
-            border-radius: 15px;
+        .dashboard{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(180px,220px));
+            gap:15px;
+            margin-bottom:25px;
         }
 
-        .form {
-            background: #111827;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        .card-dashboard{
+            background:#1e293b;
+            padding:18px;
+            border-radius:15px;
         }
 
-        .form input {
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
+        .form{
+            background:#111827;
+            padding:20px;
+            border-radius:15px;
+            margin-bottom:25px;
+
+            display:flex;
+            flex-direction:column;
+            gap:12px;
         }
 
-        .form button {
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            background: #2563eb;
-            color: white;
-            cursor: pointer;
+        .form input{
+            padding:12px;
+            border:none;
+            border-radius:10px;
+            outline:none;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+        .form button{
+            padding:12px;
+            border:none;
+            border-radius:10px;
+            background:#2563eb;
+            color:white;
+            cursor:pointer;
+            font-weight:bold;
         }
 
-        .card {
-            background: #1e293b;
-            border-radius: 15px;
-            overflow: hidden;
+        .form button:disabled{
+            background:gray;
+            cursor:not-allowed;
         }
 
-        .card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
+        .grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+            gap:20px;
         }
 
-        .card-content {
-            padding: 15px;
+        .card{
+            background:#1e293b;
+            border-radius:15px;
+            overflow:hidden;
         }
 
-        .buttons {
-            display: flex;
-            gap: 10px;
+        .card img{
+            width:100%;
+            height:200px;
+            object-fit:cover;
         }
 
-        .edit { background: #f59e0b; }
-        .delete { background: #dc2626; }
-
-        button {
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
+        .card-content{
+            padding:15px;
         }
+
+        .buttons{
+            display:flex;
+            gap:10px;
+            margin-top:15px;
+        }
+
+        .buttons button{
+            flex:1;
+            border:none;
+            padding:10px;
+            border-radius:8px;
+            color:white;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+        .edit{
+            background:#f59e0b;
+        }
+
+        .delete{
+            background:#dc2626;
+        }
+
+        .logout{
+            background:#dc2626;
+            border:none;
+            padding:10px;
+            border-radius:8px;
+            color:white;
+            cursor:pointer;
+            margin-top:10px;
+        }
+
     </style>
+
 </head>
 
 <body>
 
 <div id="app">
 
+    <!-- HEADER -->
     <header>
+
         <h1>🚗 Car Sales System</h1>
 
         <p v-if="logado" style="color:lightgreen;">
             ✔ Bem-vindo, {{ username }}
         </p>
 
-        <p v-else style="color:red;">
+        <p v-else style="color:#ff6b6b;">
             ❌ Acesso restrito
         </p>
 
-        <button v-if="logado" class="delete" @click="logout">
-            Sair
+        <button
+            v-if="logado"
+            class="logout"
+            @click="logout"
+        >
+            🚪 Sair
         </button>
+
     </header>
 
+    <!-- DASHBOARD -->
     <div class="dashboard">
+
         <div class="card-dashboard">
-            <h2>Total Carros</h2>
+            <h2>Total de Carros</h2>
             <p>{{ totalCarros }}</p>
         </div>
 
@@ -136,50 +178,117 @@
             <h2>Estado</h2>
             <p>{{ logado ? 'Online' : 'Offline' }}</p>
         </div>
+
     </div>
 
     <!-- LOGIN -->
     <div class="form" v-if="!logado">
-        <h2>Login Admin</h2>
 
-        <input v-model="username" placeholder="Username">
-        <input v-model="password" type="password" placeholder="Password">
+        <h2>🔐 Login Admin</h2>
 
-        <button @click="login">Entrar</button>
+        <input
+            v-model="username"
+            placeholder="Username"
+        >
+
+        <input
+            v-model="password"
+            type="password"
+            placeholder="Password"
+        >
+
+        <button @click="login">
+            Entrar
+        </button>
+
     </div>
 
     <!-- FORM -->
     <div class="form">
-        <h2>{{ carro.id ? 'Editar' : 'Adicionar' }} Carro</h2>
 
-        <input v-model="carro.marca" placeholder="Marca">
-        <input v-model="carro.modelo" placeholder="Modelo">
-        <input v-model="carro.ano" type="number" placeholder="Ano">
-        <input v-model="carro.preco" type="number" placeholder="Preço">
-        <input v-model="carro.imagem" placeholder="Imagem">
+        <h2>
+            {{ carro.id ? '✏ Editar Carro' : '➕ Adicionar Carro' }}
+        </h2>
 
-        <button @click="salvarCarro" :disabled="!logado">
-            Guardar
+        <input
+            v-model="carro.marca"
+            placeholder="Marca"
+        >
+
+        <input
+            v-model="carro.modelo"
+            placeholder="Modelo"
+        >
+
+        <input
+            v-model="carro.ano"
+            type="number"
+            placeholder="Ano"
+        >
+
+        <input
+            v-model="carro.preco"
+            type="number"
+            placeholder="Preço"
+        >
+
+        <input
+            v-model="carro.imagem"
+            placeholder="Imagem URL"
+        >
+
+        <button
+            @click="salvarCarro"
+            :disabled="!logado"
+        >
+            {{ carro.id ? 'Atualizar' : 'Guardar' }}
         </button>
+
     </div>
 
     <!-- LISTA -->
     <div class="grid">
-        <div class="card" v-for="c in carros" :key="c.id">
+
+        <div
+            class="card"
+            v-for="c in carros"
+            :key="c.id"
+        >
 
             <img :src="c.imagem">
 
             <div class="card-content">
+
                 <h2>{{ c.marca }} {{ c.modelo }}</h2>
-                <p>{{ c.ano }} - {{ c.preco }} MZN</p>
+
+                <p>📅 {{ c.ano }}</p>
+
+                <p>💰 {{ c.preco }} MZN</p>
 
                 <div class="buttons">
-                    <button class="edit" @click="editarCarro(c)" :disabled="!logado">Editar</button>
-                    <button class="delete" @click="eliminarCarro(c.id)" :disabled="!logado">Eliminar</button>
+
+                    <button
+                        class="edit"
+                        @click="editarCarro(c)"
+                        :disabled="!logado"
+                    >
+                        ✏ Editar
+                    </button>
+
+                    <button
+                        class="delete"
+                        @click="eliminarCarro(c.id)"
+                        :disabled="!logado"
+                    >
+                        ❌ Eliminar
+                    </button>
+
                 </div>
+
             </div>
 
         </div>
+
     </div>
 
 </div>
@@ -191,9 +300,9 @@ const { createApp } = Vue;
 createApp({
 
     data() {
+
         return {
 
-            // 🔥 CORREÇÃO FINAL (PRODUÇÃO)
             API_BASE: "/api",
 
             carros: [],
@@ -210,11 +319,13 @@ createApp({
 
             username: "",
             password: "",
+
             logado: false
         }
     },
 
     mounted() {
+
         this.carregarCarros();
     },
 
@@ -224,77 +335,180 @@ createApp({
         login() {
 
             fetch(`${this.API_BASE}/login.php`, {
+
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
                 body: JSON.stringify({
                     username: this.username,
                     password: this.password
                 })
+
             })
-            .then(r => r.json())
+
+            .then(res => res.json())
+
             .then(data => {
 
+                console.log(data);
+
                 if (data.user) {
+
                     this.logado = true;
-                    alert("✔ Login OK");
+
+                    alert("✔ Login feito com sucesso");
+
                     this.carregarCarros();
+
                 } else {
-                    alert("❌ Login inválido");
+
+                    alert(data.message || "❌ Login inválido");
                 }
 
             })
-            .catch(() => alert("Erro no login"));
+
+            .catch(err => {
+
+                console.error(err);
+
+                alert("Erro no login");
+            });
         },
 
         // LOGOUT
         logout() {
+
             this.logado = false;
+
+            this.username = "";
+
+            this.password = "";
         },
 
-        // CARROS
+        // LISTAR CARROS
         carregarCarros() {
 
             fetch(`${this.API_BASE}/carros.php`)
-                .then(r => r.json())
-                .then(data => {
-                    this.carros = data;
-                    this.totalCarros = data.length;
-                });
-        },
 
-        salvarCarro() {
+            .then(res => res.json())
 
-            let url = `${this.API_BASE}/carros.php`;
+            .then(data => {
 
-            if (this.carro.id) url += "?action=update";
+                this.carros = data;
 
-            fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(this.carro)
+                this.totalCarros = data.length;
+
             })
-            .then(() => {
-                this.carregarCarros();
-                this.limpar();
+
+            .catch(err => {
+
+                console.error(err);
             });
         },
 
+        // GUARDAR
+        salvarCarro() {
+
+            if (!this.logado) {
+
+                alert("❌ Faça login primeiro");
+
+                return;
+            }
+
+            let url = `${this.API_BASE}/carros.php`;
+
+            if (this.carro.id) {
+
+                url += "?action=update";
+            }
+
+            fetch(url, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(this.carro)
+
+            })
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                alert(data.message || "✔ Operação feita");
+
+                this.carregarCarros();
+
+                this.limparFormulario();
+
+            })
+
+            .catch(err => {
+
+                console.error(err);
+
+                alert("Erro ao guardar");
+            });
+        },
+
+        // ELIMINAR
         eliminarCarro(id) {
 
+            if (!this.logado) {
+
+                alert("❌ Faça login primeiro");
+
+                return;
+            }
+
             fetch(`${this.API_BASE}/carros.php`, {
+
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
                 body: JSON.stringify({ id })
+
             })
-            .then(() => this.carregarCarros());
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                alert(data.message || "✔ Eliminado");
+
+                this.carregarCarros();
+
+            })
+
+            .catch(err => {
+
+                console.error(err);
+
+                alert("Erro ao eliminar");
+            });
         },
 
-        editarCarro(c) {
-            this.carro = { ...c };
+        // EDITAR
+        editarCarro(carro) {
+
+            this.carro = { ...carro };
         },
 
-        limpar() {
+        // LIMPAR
+        limparFormulario() {
+
             this.carro = {
+
                 id: null,
                 marca: "",
                 modelo: "",

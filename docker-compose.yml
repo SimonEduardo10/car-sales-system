@@ -6,28 +6,10 @@ services:
     container_name: php_backend
     ports:
       - "8000:80"
-    depends_on:
-      - db
     environment:
-      DB_HOST: db
-      DB_NAME: carrosdb
-      DB_USER: root
-      DB_PASSWORD: root
+      DB_HOST: ep-curly-silence-aq03d3xa-pooler.c-8.us-east-1.aws.neon.tech
+      DB_NAME: neondb
+      DB_USER: neondb_owner
+      DB_PASSWORD: npg_X7T1aGYwNVEC
     volumes:
       - ./backend:/var/www/html
-
-  db:
-    image: mysql:8
-    container_name: mysql_db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: carrosdb
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./database:/docker-entrypoint-initdb.d   # ✅ CORRETO
-
-volumes:
-  mysql_data:

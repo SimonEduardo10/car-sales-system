@@ -1,70 +1,58 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+header("Content-Type: application/json");
+
+session_start();
 
 require_once "../db.php";
 
-header("Content-Type: application/json");
+$data = json_decode(file_get_contents("php://input"), true);
 
-/* ✅ CORS CORRETO */
-header("Access-Control-Allow-Origin: http://localhost:8000");
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+$username = $data["username"] ?? "";
+$password = $data["password"] ?? "";
 
-/* Pré-flight */
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+try {
 
-/* Ler JSON */
-$data = json_decode(file_get_contents("php://input"));
+    $sql = "SELECT * FROM users WHERE username = :username LIMIT 1";
 
-/* Validação */
-if (!isset($data->username) || !isset($data->password)) {
+    $stmt = $pdo->prepare($sql);
 
-    echo json_encode([
-        "error" => "Dados inválidos"
+    $stmt->execute([
+        ":username" => $username
     ]);
 
-    exit;
-}
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-/* Buscar utilizador */
-$stmt = $pdo->prepare("
-    SELECT * FROM users
-    WHERE username = :username
-");
+    if ($user) {
 
-$stmt->execute([
-    ":username" => $data->username
-]);
+        if ($password === $user["password"]) {
 
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $_SESSION["user"] = $user["username"];
 
-/* Validar password */
-if (!$user || !password_verify($data->password, $user['password'])) {
+            echo json_encode([
+                "user" => true,
+                "username" => $user["username"]
+            ]);
 
-    http_response_code(401);
+        } else {
+
+            echo json_encode([
+                "user" => false,
+                "message" => "Password errada"
+            ]);
+        }
+
+    } else {
+
+        echo json_encode([
+            "user" => false,
+            "message" => "Utilizador não encontrado"
+        ]);
+    }
+
+} catch (Exception $e) {
 
     echo json_encode([
-        "error" => "Credenciais inválidas"
+        "error" => $e->getMessage()
     ]);
-
-    exit;
 }
-
-/* Criar sessão */
-$_SESSION['user'] = [
-    "id" => $user["id"],
-    "username" => $user["username"]
-];
-
-/* Resposta */
-echo json_encode([
-    "message" => "Login bem-sucedido",
-    "user" => $_SESSION['user']
-]);
