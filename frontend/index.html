@@ -21,6 +21,16 @@ body{
     background:#111827;
     padding:40px;
     border-radius:15px;
+    width:90%;
+    max-width:500px;
+}
+
+h1{
+    margin-bottom:10px;
+}
+
+p{
+    opacity:0.8;
 }
 
 button{
@@ -32,6 +42,7 @@ button{
     color:white;
     cursor:pointer;
     font-size:16px;
+    width:100%;
 }
 
 button:hover{
@@ -43,17 +54,20 @@ button:hover{
 <body>
 
 <div class="container">
+
     <h1>🚗 Bem-vindo ao meu sistema</h1>
     <p>Sistema de gestão de venda de carros</p>
 
     <button onclick="entrar()">
         Entrar no sistema
     </button>
+
 </div>
 
 <script>
 function entrar(){
-    window.location.href = "frontend/";
+    // 🔥 CORRETO PARA RENDER
+    window.location.href = "dashboard.html";
 }
 </script>
 
