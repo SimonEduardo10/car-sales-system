@@ -188,6 +188,16 @@ body{
 <button class="logout" v-if="logado" @click="logout">
 🚪 Logout
 </button>
+ <button onclick="voltarHome()" style="
+        background:#2563eb;
+        border:none;
+        padding:10px;
+        border-radius:8px;
+        color:white;
+        cursor:pointer;
+    ">
+        🏠 Voltar para Início
+    </button>
 
 </div>
 
@@ -396,6 +406,11 @@ this.page='adicionar';
 }
 
 }).mount("#app");
+
+function voltarHome(){
+
+    window.location.href = "https://car-sales-system-6iin.onrender.com";
+}
 
 </script>
 
