@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Sales System</title>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
+
+body{
+    background:#0f172a;
+    color:white;
+    padding:20px;
+}
+
+.container{
+    display:flex;
+    gap:20px;
+}
+
+/* MENU */
+.sidebar{
+    width:220px;
+    background:#111827;
+    padding:15px;
+    border-radius:15px;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.menu button{
+    width:100%;
+    padding:10px;
+    margin-bottom:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#1e293b;
+    color:white;
+    text-align:left;
+}
+
+.menu button:hover{
+    background:#2563eb;
+}
+
+.logout{
+    background:#dc2626;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    color:white;
+}
+
+/* MAIN */
+.main{
+    flex:1;
+}
+
+/* DASHBOARD */
+.dashboard{
+    display:flex;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+/* CARD */
+.card{
+    background:#1e293b;
+    padding:15px;
+    border-radius:12px;
+    flex:1;
+}
+
+/* MINI GRÁFICO CIRCULAR */
+.circle{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+/* FORM */
+.form{
+    background:#111827;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:15px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.form input{
+    padding:10px;
+    border:none;
+    border-radius:8px;
+}
+
+.form button{
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    background:#2563eb;
+    color:white;
+}
+
+/* LISTA */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
+
+.card-car{
+    background:#1e293b;
+    border-radius:12px;
+    padding:10px;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
+
+.actions button{
+    flex:1;
+    border:none;
+    padding:8px;
+    border-radius:8px;
+    color:white;
+}
+
+.edit{background:#f59e0b;}
+.delete{background:#dc2626;}
+
+.color-box{
+    width:100%;
+    height:120px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="app">
+
+<div class="container">
+
+<!-- MENU -->
+<div class="sidebar">
+
+<div>
+<h3>MENU</h3>
+
+<div class="menu">
+<button @click="page='dashboard'">📊 Dashboard</button>
+<button @click="page='adicionar'">➕ Adicionar</button>
+<button @click="page='lista'">📋 Lista</button>
+<button @click="page='gestao'">✏ Gestão</button>
+</div>
+
+</div>
+
+<button class="logout" v-if="logado" @click="logout">
+🚪 Logout
+</button>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- DASHBOARD -->
+<div v-if="page==='dashboard'">
+
+<div class="dashboard">
+
+<div class="card">
+<h3>Total Carros</h3>
+<p>{{ carros.length }}</p>
+
+<!-- mini gráfico -->
+<div class="circle" :style="{background:getColor('total')}">
+{{ carros.length }}
+</div>
+
+</div>
+
+<div class="card">
+<h3>Online</h3>
+<p>{{ logado ? 'Ativo' : 'Offline' }}</p>
+
+<div class="circle" :style="{background:getColor('status')}">
+{{ logado ? 100 : 20 }}%
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- LOGIN -->
+<div class="form" v-if="!logado">
+
+<h3>Login</h3>
+
+<input v-model="username" placeholder="Username">
+<input v-model="password" type="password" placeholder="Password">
+
+<button @click="login">Entrar</button>
+
+</div>
+
+<!-- ADICIONAR -->
+<div class="form" v-if="page==='adicionar'">
+
+<h3>Adicionar Carro</h3>
+
+<input v-model="carro.marca" placeholder="Marca">
+<input v-model="carro.modelo" placeholder="Modelo">
+<input v-model="carro.ano" placeholder="Ano">
+<input v-model="carro.preco" placeholder="Preço">
+
+<button @click="salvarCarro">Guardar</button>
+
+</div>
+
+<!-- LISTA -->
+<div class="grid" v-if="page==='lista'">
+
+<div class="card-car" v-for="c in carros" :key="c.id">
+
+<!-- COR AUTOMÁTICA -->
+<div class="color-box" :style="{background:getColor(c.marca)}"></div>
+
+<h3>{{ c.marca }} {{ c.modelo }}</h3>
+<p>{{ c.ano }} - {{ c.preco }} MZN</p>
+
+</div>
+
+</div>
+
+<!-- GESTÃO -->
+<div class="grid" v-if="page==='gestao'">
+
+<div class="card-car" v-for="c in carros" :key="c.id">
+
+<div class="color-box" :style="{background:getColor(c.marca)}"></div>
+
+<h3>{{ c.marca }} {{ c.modelo }}</h3>
+
+<div class="actions">
+
+<button class="edit" @click="editarCarro(c)">Editar</button>
+<button class="delete" @click="eliminarCarro(c.id)">Eliminar</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const { createApp } = Vue;
+
+createApp({
+
+data(){
+return{
+page:'dashboard',
+carros:[],
+username:'',
+password:'',
+logado:false,
+
+carro:{
+id:null,
+marca:'',
+modelo:'',
+ano:'',
+preco:''
+}
+}
+},
+
+mounted(){
+this.carregarCarros();
+},
+
+methods:{
+
+// 🎨 CORES AUTOMÁTICAS POR MARCA
+getColor(text){
+let colors = {
+toyota:'#ef4444',
+bmw:'#3b82f6',
+audi:'#f59e0b',
+mercedes:'#10b981',
+honda:'#8b5cf6'
+};
+
+let key = text.toLowerCase();
+
+return colors[key] || '#64748b';
+},
+
+login(){
+fetch("/api/login.php",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+username:this.username,
+password:this.password
+})
+})
+.then(r=>r.json())
+.then(d=>{
+if(d.user){
+this.logado=true;
+this.page='dashboard';
+this.carregarCarros();
+}else{
+alert("Login inválido");
+}
+});
+},
+
+logout(){
+this.logado=false;
+},
+
+carregarCarros(){
+fetch("/api/carros.php")
+.then(r=>r.json())
+.then(d=>{
+this.carros=d;
+});
+},
+
+salvarCarro(){
+fetch("/api/carros.php",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(this.carro)
+})
+.then(()=>this.carregarCarros());
+},
+
+eliminarCarro(id){
+fetch("/api/carros.php",{
+method:"DELETE",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({id})
+})
+.then(()=>this.carregarCarros());
+},
+
+editarCarro(c){
+this.carro=c;
+this.page='adicionar';
+}
+
+}
+
+}).mount("#app");
+
+</script>
+
+</body>
+</html>
