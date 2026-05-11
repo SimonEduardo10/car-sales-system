@@ -61,26 +61,39 @@ body{
     padding:10px;
     border-radius:8px;
     color:white;
-    cursor:pointer;
 }
 
-/* CONTEÚDO */
+/* MAIN */
 .main{
     flex:1;
 }
 
-/* CARD DASHBOARD */
+/* DASHBOARD */
 .dashboard{
     display:flex;
     gap:15px;
     margin-bottom:20px;
 }
 
+/* CARD */
 .card{
     background:#1e293b;
     padding:15px;
     border-radius:12px;
     flex:1;
+}
+
+/* MINI GRÁFICO CIRCULAR */
+.circle{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:bold;
+    margin-top:10px;
 }
 
 /* FORM */
@@ -118,22 +131,13 @@ body{
 .card-car{
     background:#1e293b;
     border-radius:12px;
-    overflow:hidden;
-}
-
-.card-car img{
-    width:100%;
-    height:150px;
-    object-fit:cover;
-}
-
-.card-body{
     padding:10px;
 }
 
 .actions{
     display:flex;
     gap:10px;
+    margin-top:10px;
 }
 
 .actions button{
@@ -146,6 +150,13 @@ body{
 
 .edit{background:#f59e0b;}
 .delete{background:#dc2626;}
+
+.color-box{
+    width:100%;
+    height:120px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
 
 </style>
 
@@ -161,28 +172,24 @@ body{
 <div class="sidebar">
 
 <div>
-
 <h3>MENU</h3>
 
 <div class="menu">
-
 <button @click="page='dashboard'">📊 Dashboard</button>
 <button @click="page='adicionar'">➕ Adicionar</button>
 <button @click="page='lista'">📋 Lista</button>
-<button @click="page='gestao'">✏ Editar / Eliminar</button>
-
+<button @click="page='gestao'">✏ Gestão</button>
 </div>
 
 </div>
 
-<!-- LOGOUT -->
 <button class="logout" v-if="logado" @click="logout">
 🚪 Logout
 </button>
 
 </div>
 
-<!-- CONTEÚDO -->
+<!-- MAIN -->
 <div class="main">
 
 <!-- DASHBOARD -->
@@ -193,11 +200,22 @@ body{
 <div class="card">
 <h3>Total Carros</h3>
 <p>{{ carros.length }}</p>
+
+<!-- mini gráfico -->
+<div class="circle" :style="{background:getColor('total')}">
+{{ carros.length }}
+</div>
+
 </div>
 
 <div class="card">
-<h3>Status</h3>
-<p>{{ logado ? 'Online' : 'Offline' }}</p>
+<h3>Online</h3>
+<p>{{ logado ? 'Ativo' : 'Offline' }}</p>
+
+<div class="circle" :style="{background:getColor('status')}">
+{{ logado ? 100 : 20 }}%
+</div>
+
 </div>
 
 </div>
@@ -235,14 +253,11 @@ body{
 
 <div class="card-car" v-for="c in carros" :key="c.id">
 
-<img :src="getImagem(c.marca)">
-
-<div class="card-body">
+<!-- COR AUTOMÁTICA -->
+<div class="color-box" :style="{background:getColor(c.marca)}"></div>
 
 <h3>{{ c.marca }} {{ c.modelo }}</h3>
 <p>{{ c.ano }} - {{ c.preco }} MZN</p>
-
-</div>
 
 </div>
 
@@ -253,23 +268,14 @@ body{
 
 <div class="card-car" v-for="c in carros" :key="c.id">
 
-<img :src="getImagem(c.marca)">
-
-<div class="card-body">
+<div class="color-box" :style="{background:getColor(c.marca)}"></div>
 
 <h3>{{ c.marca }} {{ c.modelo }}</h3>
 
 <div class="actions">
 
-<button class="edit" @click="editarCarro(c)">
-Editar
-</button>
-
-<button class="delete" @click="eliminarCarro(c.id)">
-Eliminar
-</button>
-
-</div>
+<button class="edit" @click="editarCarro(c)">Editar</button>
+<button class="delete" @click="eliminarCarro(c.id)">Eliminar</button>
 
 </div>
 
@@ -291,9 +297,7 @@ createApp({
 
 data(){
 return{
-
 page:'dashboard',
-
 carros:[],
 username:'',
 password:'',
@@ -306,7 +310,6 @@ modelo:'',
 ano:'',
 preco:''
 }
-
 }
 },
 
@@ -316,8 +319,19 @@ this.carregarCarros();
 
 methods:{
 
-getImagem(marca){
-return `https://source.unsplash.com/400x200/?car,${marca}`;
+// 🎨 CORES AUTOMÁTICAS POR MARCA
+getColor(text){
+let colors = {
+toyota:'#ef4444',
+bmw:'#3b82f6',
+audi:'#f59e0b',
+mercedes:'#10b981',
+honda:'#8b5cf6'
+};
+
+let key = text.toLowerCase();
+
+return colors[key] || '#64748b';
 },
 
 login(){
