@@ -28,9 +28,21 @@ createApp({
     methods: {
 
         // ======================
+        // 🔥 IMAGEM AUTOMÁTICA
+        // ======================
+        getImagem(marca) {
+            if (!marca) {
+                return "https://via.placeholder.com/400x200?text=Carro";
+            }
+
+            return `https://source.unsplash.com/400x200/?${marca},car,vehicle`;
+        },
+
+        // ======================
         // LOGIN
         // ======================
         login() {
+
             fetch("/api/login.php", {
                 method: "POST",
                 headers: {
@@ -44,7 +56,6 @@ createApp({
             .then(async res => {
                 const data = await res.json().catch(() => null);
                 console.log("LOGIN RESPONSE:", data, res.status);
-
                 return data;
             })
             .then(data => {
@@ -64,30 +75,44 @@ createApp({
             });
         },
 
+        // ======================
         // LOGOUT
+        // ======================
         logout() {
             this.logado = false;
             this.username = "";
             this.password = "";
         },
 
-        // LISTAR
+        // ======================
+        // LISTAR CARROS
+        // ======================
         carregarCarros() {
+
             fetch("/api/carros.php")
             .then(res => res.json())
             .then(data => {
+
                 this.carros = data;
                 this.totalCarros = data.length;
+
             })
             .catch(err => console.error("Erro carros:", err));
         },
 
-        // SALVAR
+        // ======================
+        // SALVAR CARRO
+        // ======================
         salvarCarro() {
 
             if (!this.logado) {
                 alert("❌ Faz login primeiro");
                 return;
+            }
+
+            // 🔥 AUTO IMAGEM SE NÃO TIVER
+            if (!this.carro.imagem) {
+                this.carro.imagem = this.getImagem(this.carro.marca);
             }
 
             let url = "/api/carros.php";
@@ -105,13 +130,17 @@ createApp({
             })
             .then(res => res.json())
             .then(() => {
+
                 this.limparFormulario();
                 this.carregarCarros();
+
             })
-            .catch(err => console.error(err));
+            .catch(err => console.error("Erro salvar:", err));
         },
 
-        // ELIMINAR
+        // ======================
+        // ELIMINAR CARRO
+        // ======================
         eliminarCarro(id) {
 
             if (!this.logado) return;
@@ -125,13 +154,19 @@ createApp({
             })
             .then(res => res.json())
             .then(() => this.carregarCarros())
-            .catch(err => console.error(err));
+            .catch(err => console.error("Erro eliminar:", err));
         },
 
+        // ======================
+        // EDITAR
+        // ======================
         editarCarro(carro) {
             this.carro = { ...carro };
         },
 
+        // ======================
+        // LIMPAR FORM
+        // ======================
         limparFormulario() {
             this.carro = {
                 id: null,

@@ -1,295 +1,216 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚗 Car Sales System</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚗 Car Sales System</title>
 
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
+<style>
 
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:Arial,sans-serif;
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
 
-        body{
-            background:#0f172a;
-            color:white;
-            padding:30px;
-        }
+body{
+    background:#0f172a;
+    color:white;
+    padding:25px;
+}
 
-        header{
-            background:#111827;
-            padding:25px;
-            border-radius:15px;
-            margin-bottom:25px;
-        }
+/* HEADER */
+header{
+    background:#111827;
+    padding:20px;
+    border-radius:15px;
+    margin-bottom:20px;
+}
 
-        h1{
-            margin-bottom:10px;
-        }
+/* DASHBOARD */
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
 
-        .dashboard{
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(180px,220px));
-            gap:15px;
-            margin-bottom:25px;
-        }
+.card-dashboard{
+    background:#1e293b;
+    padding:15px;
+    border-radius:15px;
+}
 
-        .card-dashboard{
-            background:#1e293b;
-            padding:18px;
-            border-radius:15px;
-        }
+/* FILTERS */
+.filters{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
 
-        .form{
-            background:#111827;
-            padding:20px;
-            border-radius:15px;
-            margin-bottom:25px;
+.filters input{
+    padding:10px;
+    border-radius:10px;
+    border:none;
+    width:100%;
+}
 
-            display:flex;
-            flex-direction:column;
-            gap:12px;
-        }
+/* FORM */
+.form{
+    background:#111827;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:20px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
 
-        .form input{
-            padding:12px;
-            border:none;
-            border-radius:10px;
-            outline:none;
-        }
+.form input{
+    padding:10px;
+    border-radius:8px;
+    border:none;
+}
 
-        .form button{
-            padding:12px;
-            border:none;
-            border-radius:10px;
-            background:#2563eb;
-            color:white;
-            cursor:pointer;
-            font-weight:bold;
-        }
+.form button{
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+}
 
-        .form button:disabled{
-            background:gray;
-            cursor:not-allowed;
-        }
+/* GRID */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:15px;
+}
 
-        .grid{
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-            gap:20px;
-        }
+.card{
+    background:#1e293b;
+    border-radius:15px;
+    overflow:hidden;
+}
 
-        .card{
-            background:#1e293b;
-            border-radius:15px;
-            overflow:hidden;
-        }
+.card img{
+    width:100%;
+    height:160px;
+    object-fit:cover;
+}
 
-        .card img{
-            width:100%;
-            height:200px;
-            object-fit:cover;
-        }
+.card-content{
+    padding:12px;
+}
 
-        .card-content{
-            padding:15px;
-        }
+.buttons{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
 
-        .buttons{
-            display:flex;
-            gap:10px;
-            margin-top:15px;
-        }
+button{
+    border:none;
+    padding:8px;
+    border-radius:8px;
+    color:white;
+    cursor:pointer;
+}
 
-        .buttons button{
-            flex:1;
-            border:none;
-            padding:10px;
-            border-radius:8px;
-            color:white;
-            cursor:pointer;
-            font-weight:bold;
-        }
+.edit{ background:#f59e0b; }
+.delete{ background:#dc2626; }
 
-        .edit{
-            background:#f59e0b;
-        }
+.chart{
+    background:#111827;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:20px;
+}
 
-        .delete{
-            background:#dc2626;
-        }
-
-        .logout{
-            background:#dc2626;
-            border:none;
-            padding:10px;
-            border-radius:8px;
-            color:white;
-            cursor:pointer;
-            margin-top:10px;
-        }
-
-    </style>
-
+</style>
 </head>
 
 <body>
 
 <div id="app">
 
-    <!-- HEADER -->
-    <header>
+<header>
+<h2>🚗 Car Sales Dashboard</h2>
+<p v-if="logado">✔ {{ username }}</p>
+<p v-else>❌ Offline</p>
+</header>
 
-        <h1>🚗 Car Sales System</h1>
-
-        <p v-if="logado" style="color:lightgreen;">
-            ✔ Bem-vindo, {{ username }}
-        </p>
-
-        <p v-else style="color:#ff6b6b;">
-            ❌ Acesso restrito
-        </p>
-
-        <button
-            v-if="logado"
-            class="logout"
-            @click="logout"
-        >
-            🚪 Sair
-        </button>
-
-    </header>
-
-    <!-- DASHBOARD -->
-    <div class="dashboard">
-
-        <div class="card-dashboard">
-            <h2>Total de Carros</h2>
-            <p>{{ totalCarros }}</p>
-        </div>
-
-        <div class="card-dashboard">
-            <h2>Estado</h2>
-            <p>{{ logado ? 'Online' : 'Offline' }}</p>
-        </div>
-
+<!-- DASHBOARD -->
+<div class="dashboard">
+    <div class="card-dashboard">
+        <h3>Total Carros</h3>
+        <p>{{ totalCarros }}</p>
     </div>
 
-    <!-- LOGIN -->
-    <div class="form" v-if="!logado">
-
-        <h2>🔐 Login Admin</h2>
-
-        <input
-            v-model="username"
-            placeholder="Username"
-        >
-
-        <input
-            v-model="password"
-            type="password"
-            placeholder="Password"
-        >
-
-        <button @click="login">
-            Entrar
-        </button>
-
+    <div class="card-dashboard">
+        <h3>Marca Filtrada</h3>
+        <p>{{ filtroMarca || 'Todas' }}</p>
     </div>
+</div>
 
-    <!-- FORM -->
-    <div class="form">
+<!-- CHART -->
+<div class="chart">
+<canvas id="chart"></canvas>
+</div>
 
-        <h2>
-            {{ carro.id ? '✏ Editar Carro' : '➕ Adicionar Carro' }}
-        </h2>
+<!-- FILTERS -->
+<div class="filters">
+    <input v-model="filtroMarca" placeholder="Filtrar por marca">
+    <input v-model="filtroPreco" type="number" placeholder="Preço máximo">
+</div>
 
-        <input
-            v-model="carro.marca"
-            placeholder="Marca"
-        >
+<!-- LOGIN -->
+<div class="form" v-if="!logado">
+    <h3>Login</h3>
+    <input v-model="username" placeholder="Username">
+    <input v-model="password" type="password" placeholder="Password">
+    <button @click="login">Entrar</button>
+</div>
 
-        <input
-            v-model="carro.modelo"
-            placeholder="Modelo"
-        >
+<!-- FORM -->
+<div class="form">
+    <h3>{{ carro.id ? 'Editar' : 'Adicionar' }} Carro</h3>
 
-        <input
-            v-model="carro.ano"
-            type="number"
-            placeholder="Ano"
-        >
+    <input v-model="carro.marca" placeholder="Marca">
+    <input v-model="carro.modelo" placeholder="Modelo">
+    <input v-model="carro.ano" placeholder="Ano">
+    <input v-model="carro.preco" placeholder="Preço">
 
-        <input
-            v-model="carro.preco"
-            type="number"
-            placeholder="Preço"
-        >
+    <button @click="salvarCarro" :disabled="!logado">
+        Guardar
+    </button>
+</div>
 
-        <input
-            v-model="carro.imagem"
-            placeholder="Imagem URL"
-        >
+<!-- LISTA -->
+<div class="grid">
 
-        <button
-            @click="salvarCarro"
-            :disabled="!logado"
-        >
-            {{ carro.id ? 'Atualizar' : 'Guardar' }}
-        </button>
+    <div class="card" v-for="c in carrosFiltrados" :key="c.id">
 
-    </div>
+        <img :src="getImagem(c.marca)">
 
-    <!-- LISTA -->
-    <div class="grid">
+        <div class="card-content">
+            <h3>{{ c.marca }} {{ c.modelo }}</h3>
+            <p>{{ c.ano }} - {{ c.preco }} MZN</p>
 
-        <div
-            class="card"
-            v-for="c in carros"
-            :key="c.id"
-        >
-
-            <img :src="c.imagem">
-
-            <div class="card-content">
-
-                <h2>{{ c.marca }} {{ c.modelo }}</h2>
-
-                <p>📅 {{ c.ano }}</p>
-
-                <p>💰 {{ c.preco }} MZN</p>
-
-                <div class="buttons">
-
-                    <button
-                        class="edit"
-                        @click="editarCarro(c)"
-                        :disabled="!logado"
-                    >
-                        ✏ Editar
-                    </button>
-
-                    <button
-                        class="delete"
-                        @click="eliminarCarro(c.id)"
-                        :disabled="!logado"
-                    >
-                        ❌ Eliminar
-                    </button>
-
-                </div>
-
+            <div class="buttons">
+                <button class="edit" @click="editarCarro(c)">Editar</button>
+                <button class="delete" @click="eliminarCarro(c.id)">Eliminar</button>
             </div>
-
         </div>
 
     </div>
+
+</div>
 
 </div>
 
@@ -299,226 +220,141 @@ const { createApp } = Vue;
 
 createApp({
 
-    data() {
-
-        return {
-
-            API_BASE: "/api",
-
-            carros: [],
-            totalCarros: 0,
-
-            carro: {
-                id: null,
-                marca: "",
-                modelo: "",
-                ano: "",
-                preco: "",
-                imagem: ""
-            },
-
-            username: "",
-            password: "",
-
-            logado: false
-        }
-    },
-
-    mounted() {
-
-        this.carregarCarros();
-    },
-
-    methods: {
-
-        // LOGIN
-        login() {
-
-            fetch(`${this.API_BASE}/login.php`, {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    username: this.username,
-                    password: this.password
-                })
-
-            })
-
-            .then(res => res.json())
-
-            .then(data => {
-
-                console.log(data);
-
-                if (data.user) {
-
-                    this.logado = true;
-
-                    alert("✔ Login feito com sucesso");
-
-                    this.carregarCarros();
-
-                } else {
-
-                    alert(data.message || "❌ Login inválido");
-                }
-
-            })
-
-            .catch(err => {
-
-                console.error(err);
-
-                alert("Erro no login");
-            });
-        },
-
-        // LOGOUT
-        logout() {
-
-            this.logado = false;
-
-            this.username = "";
-
-            this.password = "";
-        },
-
-        // LISTAR CARROS
-        carregarCarros() {
-
-            fetch(`${this.API_BASE}/carros.php`)
-
-            .then(res => res.json())
-
-            .then(data => {
-
-                this.carros = data;
-
-                this.totalCarros = data.length;
-
-            })
-
-            .catch(err => {
-
-                console.error(err);
-            });
-        },
-
-        // GUARDAR
-        salvarCarro() {
-
-            if (!this.logado) {
-
-                alert("❌ Faça login primeiro");
-
-                return;
-            }
-
-            let url = `${this.API_BASE}/carros.php`;
-
-            if (this.carro.id) {
-
-                url += "?action=update";
-            }
-
-            fetch(url, {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify(this.carro)
-
-            })
-
-            .then(res => res.json())
-
-            .then(data => {
-
-                alert(data.message || "✔ Operação feita");
-
-                this.carregarCarros();
-
-                this.limparFormulario();
-
-            })
-
-            .catch(err => {
-
-                console.error(err);
-
-                alert("Erro ao guardar");
-            });
-        },
-
-        // ELIMINAR
-        eliminarCarro(id) {
-
-            if (!this.logado) {
-
-                alert("❌ Faça login primeiro");
-
-                return;
-            }
-
-            fetch(`${this.API_BASE}/carros.php`, {
-
-                method: "DELETE",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({ id })
-
-            })
-
-            .then(res => res.json())
-
-            .then(data => {
-
-                alert(data.message || "✔ Eliminado");
-
-                this.carregarCarros();
-
-            })
-
-            .catch(err => {
-
-                console.error(err);
-
-                alert("Erro ao eliminar");
-            });
-        },
-
-        // EDITAR
-        editarCarro(carro) {
-
-            this.carro = { ...carro };
-        },
-
-        // LIMPAR
-        limparFormulario() {
-
-            this.carro = {
-
-                id: null,
-                marca: "",
-                modelo: "",
-                ano: "",
-                preco: "",
-                imagem: ""
-            };
-        }
-
-    }
+data() {
+return {
+
+API_BASE: "/api",
+
+carros: [],
+filtroMarca: "",
+filtroPreco: "",
+
+carro: {
+id: null,
+marca: "",
+modelo: "",
+ano: "",
+preco: ""
+},
+
+username: "",
+password: "",
+logado: false
+}
+},
+
+mounted() {
+this.carregarCarros();
+this.initChart();
+},
+
+computed: {
+
+carrosFiltrados() {
+return this.carros.filter(c => {
+
+let okMarca = c.marca.toLowerCase().includes(this.filtroMarca.toLowerCase());
+
+let okPreco = this.filtroPreco ? Number(c.preco) <= Number(this.filtroPreco) : true;
+
+return okMarca && okPreco;
+});
+}
+
+},
+
+methods: {
+
+// 🔥 IMAGEM AUTOMÁTICA
+getImagem(marca){
+if(!marca) return "https://via.placeholder.com/400x200";
+return `https://source.unsplash.com/400x200/?car,${marca}`;
+},
+
+// LOGIN
+login(){
+fetch(this.API_BASE + "/login.php", {
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({
+username:this.username,
+password:this.password
+})
+})
+.then(r=>r.json())
+.then(d=>{
+if(d.user){
+this.logado=true;
+this.carregarCarros();
+this.updateChart();
+}
+else alert("Login inválido");
+});
+},
+
+// CARROS
+carregarCarros(){
+fetch(this.API_BASE + "/carros.php")
+.then(r=>r.json())
+.then(d=>{
+this.carros=d;
+this.totalCarros=d.length;
+this.updateChart();
+});
+},
+
+salvarCarro(){
+if(!this.logado) return;
+
+fetch(this.API_BASE + "/carros.php",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify(this.carro)
+})
+.then(()=>this.carregarCarros());
+},
+
+eliminarCarro(id){
+fetch(this.API_BASE + "/carros.php",{
+method:"DELETE",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({id})
+})
+.then(()=>this.carregarCarros());
+},
+
+editarCarro(c){
+this.carro={...c};
+},
+
+// 📊 CHART
+initChart(){
+this.chart = new Chart(document.getElementById("chart"),{
+type:"bar",
+data:{
+labels:[],
+datasets:[{
+label:"Carros por Marca",
+data:[],
+backgroundColor:"#2563eb"
+}]
+}
+});
+},
+
+updateChart(){
+let marcas={};
+
+this.carros.forEach(c=>{
+marcas[c.marca]=(marcas[c.marca]||0)+1;
+});
+
+this.chart.data.labels=Object.keys(marcas);
+this.chart.data.datasets[0].data=Object.values(marcas);
+this.chart.update();
+}
+
+}
 
 }).mount("#app");
 
