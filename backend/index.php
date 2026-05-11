@@ -1,5 +1,3 @@
 <?php
-
-require_once "db.php";
-
-echo "Conexão com MySQL OK!";
+header("Location: /dashboard.html");
+exit;
